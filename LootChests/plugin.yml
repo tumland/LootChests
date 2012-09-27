@@ -1,0 +1,29 @@
+name: LootChests
+main: com.coffeejawa.LootChests.LootChestsMain
+version: 0.5
+authors: [tumland]
+description: LootChests allows other plugins to create chests on demand which are exclusively accessible to a set of players.
+
+commands:
+    lootchests:
+        description: Root command for all LootChests Commands.
+        aliases: lc
+        usage: /lc <on|off> [freeze time]
+        permission: lc.help
+        permission-message: You require permission mcd.help to do that.
+        
+permissions:
+    lc.*:
+        description: Gives access to all LootChests commands/functions.
+        default: op
+        children:
+            lc.control: true
+            lc.help: true
+
+    lc.control:
+        description: Allows user to enable/disable LootChests.
+        default: false
+        
+    lc.help:
+        description: Allows user to view command help text.
+        default: false
