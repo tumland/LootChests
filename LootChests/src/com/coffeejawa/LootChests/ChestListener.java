@@ -1,5 +1,6 @@
 package com.coffeejawa.LootChests;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -7,9 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
 
 public class ChestListener implements Listener {
     private LootChestsMain plugin;
@@ -29,11 +31,11 @@ public class ChestListener implements Listener {
         }
         
         // if its not in our map, we don't care
-        if(!plugin.getChestPlayerMap().containsKey(block)){
+        if(!plugin.hasChest(block)){
             return;
         }
         
-        Player chestOwner = plugin.getChestPlayerMap().get(block);
+        Player chestOwner = plugin.getChestOwner(block);
         if(!chestOwner.equals(event.getPlayer())){
             // block access
             event.setCancelled(true);
@@ -41,19 +43,53 @@ public class ChestListener implements Listener {
         
         // remove chest if empty
         // TODO : this needs to be done after Player removes an item, not when first interacting
-        Chest chest = (Chest) block;
+        Chest chest = (Chest) block.getState();
         if(chest.getBlockInventory().getSize() == 0){
             chest.setType(Material.AIR);
             event.setCancelled(true);
         }
         
     }
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onInventoryEvent(InventoryEvent event)
+    @EventHandler
+    public void onInventoryEvent(InventoryClickEvent event)
     {   
         // Check the inventory of the chest
         InventoryView view = event.getView();
-        plugin.logger.info(view.toString());   
+        
+        // Chest non-empty, ignore.
+        for( ItemStack item : view.getTopInventory().getContents()){
+            if(item != null){
+                return;
+            }
+            
+        }
+        
+        Player player = (Player) event.getWhoClicked();
+        if(plugin.rightClickListener.hasLastRightClick(player)){
+            Location location = plugin.rightClickListener.getLastRightClick(player, null);
+            
+            if(location == null){
+                plugin.logger.info("location not found");
+                return;
+            }
+            
+            Block b = location.getBlock();
+            
+            // Chest not in our cache, ignore
+            if(!plugin.hasChest(b)){
+                plugin.logger.info("not tracking chest");
+                return;
+            }
+            
+            // Chest owned by another player, ignore
+            if(plugin.getChestOwner(b) != player){
+                plugin.logger.info("not owner of chest");
+                return;
+            }
+            
+            b.setType(Material.AIR);
+        }
+        
     }
     
     

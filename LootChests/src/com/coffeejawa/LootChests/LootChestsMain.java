@@ -14,11 +14,30 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class LootChestsMain extends JavaPlugin  {
     public final Logger logger = Logger.getLogger("Minecraft");
+    public PlayerInteractionListener  rightClickListener;
     
     private HashMap<CustomChest,Player> ChestPlayerMap;
     
     public HashMap<CustomChest, Player> getChestPlayerMap() {
         return ChestPlayerMap;
+    }
+    
+    public Boolean hasChest(Block b){
+        for( CustomChest c : getChestPlayerMap().keySet() ){
+            if(c.getChestBlock().getLocation().equals(b.getLocation())){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public Player getChestOwner(Block b){
+        for( CustomChest c : getChestPlayerMap().keySet() ){
+            if(c.getChestBlock().getLocation().equals(b.getLocation())){
+                return getChestPlayerMap().get(c);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -27,7 +46,12 @@ public class LootChestsMain extends JavaPlugin  {
         ChestPlayerMap = new HashMap<CustomChest, Player>();
         
         this.reloadConfig();
+        
+        rightClickListener = new PlayerInteractionListener();
+        
         getServer().getPluginManager().registerEvents(new ChestListener(this), this);
+        getServer().getPluginManager().registerEvents(rightClickListener, this);
+        
         logger.info("[" + this.getDescription().getName() +  "] enabled.");
         
         
@@ -51,7 +75,7 @@ public class LootChestsMain extends JavaPlugin  {
         this.saveConfig();
     }
 
-    public Block CreateChest(Player player, Location location, ArrayList<ItemStack> items, float timeout)
+    public Chest CreateChest(Player player, Location location, ArrayList<ItemStack> items, float timeout)
     {
         // if there are no items, why bother
         if(items.size() == 0)
@@ -68,16 +92,17 @@ public class LootChestsMain extends JavaPlugin  {
         
         // otherwise change block type from air to chest
         b.setType(Material.CHEST);
-        // insert in our map
-        ChestPlayerMap.put(new CustomChest(b,timeout), player);
         
         // insert items
-        Chest chest = (Chest) b;
+        Chest chest = (Chest) b.getState();
         for( ItemStack item : items ){
             chest.getBlockInventory().addItem(item);
         }
         
-        return b;
+        // insert in our map
+        ChestPlayerMap.put(new CustomChest(chest,timeout), player);
+        
+        return chest;
     }
     
 }
