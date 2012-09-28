@@ -65,7 +65,7 @@ public class LootChestsMain extends JavaPlugin  {
                     }
                 }
             }
-         }, 0L, 600L);
+         }, 0L, 100L);
     }
     
     @Override

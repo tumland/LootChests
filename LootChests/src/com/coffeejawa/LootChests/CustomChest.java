@@ -26,6 +26,6 @@ public class CustomChest {
     }
 
     public void tearDown(){
-        this.chestBlock.setType(Material.AIR);
+        chestBlock.getBlock().setType(Material.AIR);
     }
 }

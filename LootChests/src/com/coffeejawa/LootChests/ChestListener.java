@@ -69,7 +69,6 @@ public class ChestListener implements Listener {
             Location location = plugin.rightClickListener.getLastRightClick(player, null);
             
             if(location == null){
-                plugin.logger.info("location not found");
                 return;
             }
             
@@ -77,13 +76,11 @@ public class ChestListener implements Listener {
             
             // Chest not in our cache, ignore
             if(!plugin.hasChest(b)){
-                plugin.logger.info("not tracking chest");
                 return;
             }
             
             // Chest owned by another player, ignore
             if(plugin.getChestOwner(b) != player){
-                plugin.logger.info("not owner of chest");
                 return;
             }
             
