@@ -2,7 +2,6 @@ package com.coffeejawa.LootChests;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 
 public class CustomChest {
 

@@ -7,7 +7,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.InventoryView;
 
 public class ChestListener implements Listener {
     private LootChestsMain plugin;
@@ -45,6 +47,13 @@ public class ChestListener implements Listener {
             event.setCancelled(true);
         }
         
+    }
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onInventoryEvent(InventoryEvent event)
+    {   
+        // Check the inventory of the chest
+        InventoryView view = event.getView();
+        plugin.logger.info(view.toString());   
     }
     
     
