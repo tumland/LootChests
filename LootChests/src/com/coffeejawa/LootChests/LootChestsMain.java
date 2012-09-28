@@ -53,6 +53,10 @@ public class LootChestsMain extends JavaPlugin  {
 
     public Block CreateChest(Player player, Location location, ArrayList<ItemStack> items, float timeout)
     {
+        // if there are no items, why bother
+        if(items.size() == 0)
+            return null;
+        
         // attempt to create a block 1 tile above
         location.setY(location.getY());
         
