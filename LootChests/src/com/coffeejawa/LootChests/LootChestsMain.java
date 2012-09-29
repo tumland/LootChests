@@ -14,7 +14,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class LootChestsMain extends JavaPlugin  {
     public final Logger logger = Logger.getLogger("Minecraft");
-    public PlayerInteractionListener  rightClickListener;
     
     private HashMap<CustomChest,Player> ChestPlayerMap;
     
@@ -47,10 +46,7 @@ public class LootChestsMain extends JavaPlugin  {
         
         this.reloadConfig();
         
-        rightClickListener = new PlayerInteractionListener();
-        
         getServer().getPluginManager().registerEvents(new ChestListener(this), this);
-        getServer().getPluginManager().registerEvents(rightClickListener, this);
         
         logger.info("[" + this.getDescription().getName() +  "] enabled.");
         

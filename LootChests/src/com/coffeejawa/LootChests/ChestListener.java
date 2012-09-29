@@ -1,6 +1,5 @@
 package com.coffeejawa.LootChests;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -65,14 +64,9 @@ public class ChestListener implements Listener {
         }
         
         Player player = (Player) event.getWhoClicked();
-        if(plugin.rightClickListener.hasLastRightClick(player)){
-            Location location = plugin.rightClickListener.getLastRightClick(player, null);
-            
-            if(location == null){
-                return;
-            }
-            
-            Block b = location.getBlock();
+        Chest c = (Chest) view.getTopInventory().getHolder();
+        if( c != null ){
+            Block b = c.getBlock();
             
             // Chest not in our cache, ignore
             if(!plugin.hasChest(b)){
