@@ -22,19 +22,28 @@ public class LootChestsMain extends JavaPlugin  {
         return ChestPlayerMap;
     }
     
-    public Boolean hasChest(Block b){
+    public Boolean hasChest(Location location){
         for( CustomChest c : getChestPlayerMap().keySet() ){
-            if(c.getChestBlock().getLocation().equals(b.getLocation())){
+            if(c.getChestBlock().getLocation().equals(location)){
                 return true;
             }
         }
         return false;
     }
     
-    public Player getChestOwner(Block b){
+    public Player getChestOwner(Location location){
         for( CustomChest c : getChestPlayerMap().keySet() ){
-            if(c.getChestBlock().getLocation().equals(b.getLocation())){
+            if(c.getChestBlock().getLocation().equals(location)){
                 return getChestPlayerMap().get(c);
+            }
+        }
+        return null;
+    }
+    
+    public CustomChest getChest(Location location){
+        for( CustomChest c : getChestPlayerMap().keySet() ){
+            if(c.getChestBlock().getLocation().equals(location)){
+                return c;
             }
         }
         return null;
@@ -104,14 +113,20 @@ public class LootChestsMain extends JavaPlugin  {
             // if this player owns one of the chests, add the items to that one instead
             // of spawning a new one.
             for( Chest c : chestList ){
-                if( getChestOwner(c.getBlock()) == player ){
+                if( getChestOwner(c.getLocation()) == player ){
                     b = c.getBlock();
                 }
             }
             // if this player does not own any of the chests, spawn a new one 1 block above
             if( b == null ){
-                location.setY(location.getY() + 1);
-                b = location.getBlock();
+                while( b == null ){
+                    location.setY(location.getY() + 1);
+                    Block b2 = location.getBlock();
+                    if( b2.getType() == Material.AIR ){
+                        b = b2;
+                    }
+                }
+                
             }
             
         }
@@ -139,7 +154,14 @@ public class LootChestsMain extends JavaPlugin  {
         }
         
         // insert in our map
-        ChestPlayerMap.put(new CustomChest(chest,timeout), player);
+        if(!this.hasChest(b.getLocation())){
+            ChestPlayerMap.put(new CustomChest(chest,timeout), player);
+        }
+        else{
+            // reset chest cooldown
+            getChest(b.getLocation()).SetTimeout(timeout);
+        }
+            
         
         return chest;
     }

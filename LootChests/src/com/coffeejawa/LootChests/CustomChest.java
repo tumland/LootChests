@@ -13,6 +13,10 @@ public class CustomChest {
         this.timeout = System.currentTimeMillis() + timeout * 1000;
     }
     
+    public void SetTimeout(float timeout){
+        this.timeout = System.currentTimeMillis() + timeout * 1000;
+    }
+    
     public Boolean hasTimeoutExpired(){
         if( System.currentTimeMillis() > this.timeout ){
             // chest has timed out

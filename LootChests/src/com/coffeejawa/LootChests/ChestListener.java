@@ -30,11 +30,11 @@ public class ChestListener implements Listener {
         }
         
         // if its not in our map, we don't care
-        if(!plugin.hasChest(block)){
+        if(!plugin.hasChest(block.getLocation())){
             return;
         }
         
-        Player chestOwner = plugin.getChestOwner(block);
+        Player chestOwner = plugin.getChestOwner(block.getLocation());
         if(!chestOwner.equals(event.getPlayer())){
             // block access
             event.setCancelled(true);
@@ -69,12 +69,12 @@ public class ChestListener implements Listener {
             Block b = c.getBlock();
             
             // Chest not in our cache, ignore
-            if(!plugin.hasChest(b)){
+            if(!plugin.hasChest(b.getLocation())){
                 return;
             }
             
             // Chest owned by another player, ignore
-            if(plugin.getChestOwner(b) != player){
+            if(plugin.getChestOwner(b.getLocation()) != player){
                 return;
             }
             
