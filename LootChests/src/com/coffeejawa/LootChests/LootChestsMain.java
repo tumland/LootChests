@@ -1,5 +1,10 @@
 package com.coffeejawa.LootChests;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,9 +21,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class LootChestsMain extends JavaPlugin  {
     public final Logger logger = Logger.getLogger("Minecraft");
     
-    private HashMap<CustomChest,Player> ChestPlayerMap;
-    
-    public HashMap<CustomChest, Player> getChestPlayerMap() {
+    private HashMap<CustomChest,String> ChestPlayerMap;
+    public HashMap<CustomChest, String> getChestPlayerMap() {
         return ChestPlayerMap;
     }
     
@@ -31,7 +35,7 @@ public class LootChestsMain extends JavaPlugin  {
         return false;
     }
     
-    public Player getChestOwner(Location location){
+    public String getChestOwner(Location location){
         for( CustomChest c : getChestPlayerMap().keySet() ){
             if(c.getChestBlock().getLocation().equals(location)){
                 return getChestPlayerMap().get(c);
@@ -49,10 +53,11 @@ public class LootChestsMain extends JavaPlugin  {
         return null;
     }
 
+    @SuppressWarnings({ "unchecked", "static-access" })
     @Override
     public void onEnable() 
     {        
-        ChestPlayerMap = new HashMap<CustomChest, Player>();
+        ChestPlayerMap = new HashMap<CustomChest, String>();
         
         this.reloadConfig();
         
@@ -72,13 +77,29 @@ public class LootChestsMain extends JavaPlugin  {
                 }
             }
          }, 0L, 100L);
+        
+        try {
+            ChestPlayerMap = (HashMap<CustomChest, String>) this.load(getDataFolder() + File.separator + "ChestPlayerMap.dat");
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
     }
     
+    @SuppressWarnings("static-access")
     @Override
     public void onDisable() 
     {
         logger.info("[" + this.getDescription().getName() +  "] disabled.");  
         this.saveConfig();
+        
+        try {
+            this.save(ChestPlayerMap, getDataFolder() + File.separator + "ChestPlayerMap.dat");
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public Chest CreateChest(Player player, Location location, ArrayList<ItemStack> items, float timeout)
@@ -113,7 +134,7 @@ public class LootChestsMain extends JavaPlugin  {
             // if this player owns one of the chests, add the items to that one instead
             // of spawning a new one.
             for( Chest c : chestList ){
-                if( getChestOwner(c.getLocation()) == player ){
+                if( getChestOwner(c.getLocation()) == player.getName() ){
                     b = c.getBlock();
                 }
             }
@@ -155,19 +176,31 @@ public class LootChestsMain extends JavaPlugin  {
         
         // insert in our map
         if(!this.hasChest(b.getLocation())){
-            ChestPlayerMap.put(new CustomChest(chest,timeout), player);
+            ChestPlayerMap.put(new CustomChest(chest,timeout), player.getName());
         }
         else{
             // reset chest cooldown
             getChest(b.getLocation()).SetTimeout(timeout);
         }
-            
-        
         return chest;
     }
-    
-}
 
+    public static void save(Object obj,String path) throws Exception
+    {
+        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path));
+        oos.writeObject(obj);
+        oos.flush();
+        oos.close();
+    
+    }
+    public static Object load(String path) throws Exception
+    {
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path));
+        Object result = ois.readObject();
+        ois.close();
+        return result;
+    }
+    }
 
 /* 
  * Requirements:
