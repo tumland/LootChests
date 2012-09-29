@@ -1,6 +1,7 @@
 package com.coffeejawa.LootChests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -77,11 +78,53 @@ public class LootChestsMain extends JavaPlugin  {
         if(items.size() == 0)
             return null;
         
-        // attempt to create a block 1 tile above
-        location.setY(location.getY());
+        // check for nearby chests, no double chests allowed
         
-        Block b = location.getWorld().getBlockAt(location);
-        if( b.getTypeId() != Material.AIR.getId() ){
+        Location locX1 = location.clone();
+        Location locX2 = location.clone();
+        Location locY1 = location.clone();
+        Location locY2 = location.clone();
+        
+        locX1.setX(locX1.getX() - 1);
+        locX2.setX(locX2.getX() + 1);
+        locY1.setY(locY1.getY() - 1);
+        locY2.setY(locY2.getY() + 1);
+        
+        ArrayList<Location> locList = new ArrayList<Location>(Arrays.asList(locX1,locX2,locY1,locY2));
+        ArrayList<Chest> chestList = new ArrayList<Chest>(); 
+        
+        for( Location loc : locList ){
+            if (loc.getBlock().getType() == Material.CHEST){
+                chestList.add((Chest) loc.getBlock().getState());
+            }
+        }
+        Block b = null; 
+        if( chestList.size() > 0 ){
+            // UH OH SPAGHETTIOS
+            // if this player owns one of the chests, add the items to that one instead
+            // of spawning a new one.
+            for( Chest c : chestList ){
+                if( getChestOwner(c.getBlock()) == player ){
+                    b = c.getBlock();
+                }
+            }
+            // if this player does not own any of the chests, spawn a new one 1 block above
+            if( b == null ){
+                location.setY(location.getY() + 1);
+                b = location.getBlock();
+            }
+            
+        }
+        else {
+            b = location.getWorld().getBlockAt(location);
+        }
+        
+        if( b == null ){
+            // no block, wtf??
+            return null;
+        }
+        
+        if( b.getType() != Material.AIR && b.getType() != Material.CHEST ){
             // not air, we can't create a block here
             return null;
         }
