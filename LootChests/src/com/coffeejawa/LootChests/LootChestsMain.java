@@ -184,7 +184,7 @@ public class LootChestsMain extends JavaPlugin  {
         
         
         try {
-            this.save(ChestPlayerMap, getDataFolder() + File.separator + "ChestPlayerMap.dat");
+            this.save(newMap, getDataFolder() + File.separator + "ChestPlayerMap.dat");
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
