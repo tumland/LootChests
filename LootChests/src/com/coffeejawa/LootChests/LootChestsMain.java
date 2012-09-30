@@ -21,8 +21,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class LootChestsMain extends JavaPlugin  {
     public final Logger logger = Logger.getLogger("Minecraft");
     
-    private HashMap<CustomChest,String> ChestPlayerMap;
-    public HashMap<CustomChest, String> getChestPlayerMap() {
+    private HashMap<CustomChest, Player> ChestPlayerMap;
+    public HashMap<CustomChest, Player> getChestPlayerMap() {
         return ChestPlayerMap;
     }
     
@@ -35,7 +35,7 @@ public class LootChestsMain extends JavaPlugin  {
         return false;
     }
     
-    public String getChestOwner(Location location){
+    public Player getChestOwner(Location location){
         for( CustomChest c : getChestPlayerMap().keySet() ){
             if(c.getChestBlock().getLocation().equals(location)){
                 return getChestPlayerMap().get(c);
@@ -53,11 +53,10 @@ public class LootChestsMain extends JavaPlugin  {
         return null;
     }
 
-    @SuppressWarnings({ "unchecked", "static-access" })
     @Override
     public void onEnable() 
     {        
-        ChestPlayerMap = new HashMap<CustomChest, String>();
+        ChestPlayerMap = new HashMap<CustomChest, Player>();
         
         this.reloadConfig();
         
@@ -78,28 +77,17 @@ public class LootChestsMain extends JavaPlugin  {
             }
          }, 0L, 100L);
         
-        try {
-            ChestPlayerMap = (HashMap<CustomChest, String>) this.load(getDataFolder() + File.separator + "ChestPlayerMap.dat");
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
+
+        loadObjects();
     }
     
-    @SuppressWarnings("static-access")
     @Override
     public void onDisable() 
     {
         logger.info("[" + this.getDescription().getName() +  "] disabled.");  
         this.saveConfig();
         
-        try {
-            this.save(ChestPlayerMap, getDataFolder() + File.separator + "ChestPlayerMap.dat");
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        saveObjects();
     }
 
     public Chest CreateChest(Player player, Location location, ArrayList<ItemStack> items, float timeout)
@@ -134,7 +122,7 @@ public class LootChestsMain extends JavaPlugin  {
             // if this player owns one of the chests, add the items to that one instead
             // of spawning a new one.
             for( Chest c : chestList ){
-                if( getChestOwner(c.getLocation()) == player.getName() ){
+                if( getChestOwner(c.getLocation()) == player ){
                     b = c.getBlock();
                 }
             }
@@ -176,7 +164,7 @@ public class LootChestsMain extends JavaPlugin  {
         
         // insert in our map
         if(!this.hasChest(b.getLocation())){
-            ChestPlayerMap.put(new CustomChest(chest,timeout), player.getName());
+            ChestPlayerMap.put(new CustomChest(chest,timeout), player);
         }
         else{
             // reset chest cooldown
@@ -184,6 +172,46 @@ public class LootChestsMain extends JavaPlugin  {
         }
         return chest;
     }
+    
+    @SuppressWarnings("static-access")
+    public void saveObjects(){
+        
+        // convert into serializable objects
+        HashMap<SerializableLocation,String> newMap = new HashMap<SerializableLocation,String>();
+        for( CustomChest chest : this.getChestPlayerMap().keySet() ){
+            newMap.put(new SerializableLocation(chest.getChestBlock().getLocation()),getChestPlayerMap().get(chest).getName());
+        }
+        
+        
+        try {
+            this.save(ChestPlayerMap, getDataFolder() + File.separator + "ChestPlayerMap.dat");
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
+    @SuppressWarnings({ "static-access", "unchecked" })
+    public void loadObjects(){
+        HashMap<SerializableLocation,String> newMap = new HashMap<SerializableLocation,String>();
+        try {
+            newMap = (HashMap<SerializableLocation,String>) this.load(getDataFolder() + File.separator + "ChestPlayerMap.dat");
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        
+        for( SerializableLocation sloc : newMap.keySet() ){
+            String playername = newMap.get(sloc);
+            Player player = getServer().getPlayer(playername);
+            Block b = SerializableLocation.returnLocation(sloc).getBlock();
+            CustomChest c = new CustomChest((Chest) b.getState(), 5);
+            
+            getChestPlayerMap().put(c, player);
+        }
+    }
+    
 
     public static void save(Object obj,String path) throws Exception
     {

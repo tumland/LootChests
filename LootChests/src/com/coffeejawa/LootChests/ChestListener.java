@@ -34,7 +34,7 @@ public class ChestListener implements Listener {
             return;
         }
         
-        String chestOwner = plugin.getChestOwner(block.getLocation());
+        Player chestOwner = plugin.getChestOwner(block.getLocation());
         if(!chestOwner.equals(event.getPlayer().getName())){
             // block access
             event.setCancelled(true);
@@ -74,7 +74,7 @@ public class ChestListener implements Listener {
             }
             
             // Chest owned by another player, ignore
-            if(plugin.getChestOwner(b.getLocation()) != player.getName()){
+            if(plugin.getChestOwner(b.getLocation()) != player){
                 return;
             }
             
