@@ -100,15 +100,15 @@ public class LootChestsMain extends JavaPlugin  {
         
         Location locX1 = location.clone();
         Location locX2 = location.clone();
-        Location locY1 = location.clone();
-        Location locY2 = location.clone();
+        Location locZ1 = location.clone();
+        Location locZ2 = location.clone();
         
         locX1.setX(locX1.getX() - 1);
         locX2.setX(locX2.getX() + 1);
-        locY1.setY(locY1.getY() - 1);
-        locY2.setY(locY2.getY() + 1);
+        locZ1.setY(locZ1.getZ() - 1);
+        locZ2.setY(locZ2.getZ() + 1);
         
-        ArrayList<Location> locList = new ArrayList<Location>(Arrays.asList(locX1,locX2,locY1,locY2));
+        ArrayList<Location> locList = new ArrayList<Location>(Arrays.asList(locX1,locX2,locZ1,locZ2));
         ArrayList<Chest> chestList = new ArrayList<Chest>(); 
         
         for( Location loc : locList ){
@@ -124,6 +124,7 @@ public class LootChestsMain extends JavaPlugin  {
             for( Chest c : chestList ){
                 if( getChestOwner(c.getLocation()) == player ){
                     b = c.getBlock();
+                    break;
                 }
             }
             // if this player does not own any of the chests, spawn a new one 1 block above
@@ -153,7 +154,7 @@ public class LootChestsMain extends JavaPlugin  {
             return null;
         }
         
-        // otherwise change block type from air to chest
+        // change block type from air to chest
         b.setType(Material.CHEST);
         
         // insert items
